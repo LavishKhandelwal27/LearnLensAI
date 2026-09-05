@@ -1,0 +1,2107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LearnLens AI</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #070A12;
+      --panel: #0B1020;
+      --card: #111827;
+      --card-soft: rgba(17, 24, 39, 0.72);
+      --line: rgba(148, 163, 184, 0.16);
+      --line-strong: rgba(148, 163, 184, 0.28);
+
+      --text: #E6EDF3;
+      --text-soft: #A8B3C7;
+      --text-muted: #6B7890;
+
+      --purple: #8B5CF6;
+      --blue: #3B82F6;
+      --cyan: #22D3EE;
+      --green: #22C55E;
+      --amber: #F59E0B;
+      --red: #EF4444;
+
+      --grad: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 58%, #22D3EE 100%);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --shadow: 0 20px 60px rgba(0,0,0,.34);
+      --ease: cubic-bezier(.22,1,.36,1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(139,92,246,.12), transparent 34rem),
+        radial-gradient(circle at bottom right, rgba(34,211,238,.10), transparent 34rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148,163,184,.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,.022) 1px, transparent 1px);
+      background-size: 44px 44px;
+      opacity: .7;
+      z-index: -1;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .58;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--purple);
+      outline-offset: 3px;
+      border-radius: 12px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .auth-shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+
+    .auth-card {
+      width: min(1040px, 100%);
+      display: grid;
+      grid-template-columns: .95fr 1.05fr;
+      border: 1px solid var(--line);
+      background: rgba(11,16,32,.82);
+      backdrop-filter: blur(18px);
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .auth-intro {
+      padding: 42px;
+      border-right: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(139,92,246,.17), transparent 18rem),
+        radial-gradient(circle at 80% 78%, rgba(34,211,238,.10), transparent 18rem);
+    }
+
+    .auth-form {
+      padding: 42px;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+    }
+
+    .brand-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+
+    .tagline {
+      color: var(--text-muted);
+      font-size: .86rem;
+      margin-top: 2px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      line-height: 1.02;
+      letter-spacing: -.055em;
+      margin: 0 0 18px;
+    }
+
+    h2 {
+      font-size: 1.55rem;
+      line-height: 1.2;
+      letter-spacing: -.025em;
+      margin: 0 0 12px;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      margin: 0 0 10px;
+    }
+
+    p {
+      color: var(--text-soft);
+      line-height: 1.65;
+      margin: 0 0 16px;
+    }
+
+    .muted {
+      color: var(--text-muted);
+    }
+
+    .small {
+      font-size: .88rem;
+    }
+
+    .micro {
+      font-size: .76rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .label {
+      color: var(--text-soft);
+      font-size: .86rem;
+      font-weight: 650;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(7,10,18,.58);
+      color: var(--text);
+      border-radius: 16px;
+      min-height: 48px;
+      padding: 12px 14px;
+    }
+
+    .textarea {
+      min-height: 128px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .input::placeholder,
+    .textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: rgba(17,24,39,.84);
+      color: var(--text);
+      min-height: 46px;
+      border-radius: 999px;
+      padding: 0 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: transform .16s var(--ease), border-color .16s var(--ease), background .16s var(--ease);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(17,24,39,.98);
+    }
+
+    .btn.primary {
+      border: 0;
+      background: var(--grad);
+      color: #EAF6FB;
+      box-shadow: 0 0 28px rgba(139,92,246,.24);
+    }
+
+    .btn.soft {
+      background: rgba(139,92,246,.10);
+      border-color: rgba(139,92,246,.24);
+    }
+
+    .btn.danger {
+      background: rgba(239,68,68,.10);
+      border-color: rgba(239,68,68,.26);
+      color: #FECACA;
+    }
+
+    .btn.full {
+      width: 100%;
+    }
+
+    .link-btn {
+      border: 0;
+      background: transparent;
+      color: var(--cyan);
+      padding: 0;
+      min-height: auto;
+    }
+
+    .error {
+      display: none;
+      color: #FCA5A5;
+      background: rgba(239,68,68,.09);
+      border: 1px solid rgba(239,68,68,.2);
+      border-radius: 14px;
+      padding: 10px 12px;
+      line-height: 1.45;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    .success {
+      color: #86EFAC;
+      background: rgba(34,197,94,.09);
+      border: 1px solid rgba(34,197,94,.18);
+      border-radius: 14px;
+      padding: 10px 12px;
+      line-height: 1.45;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(148,163,184,.07);
+      color: var(--text-soft);
+      padding: 6px 12px;
+      font-size: .84rem;
+    }
+
+    .chip.active {
+      color: var(--text);
+      border-color: rgba(139,92,246,.38);
+      background: rgba(139,92,246,.12);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      min-height: 100vh;
+      padding: 22px 16px;
+      border-right: 1px solid var(--line);
+      background: rgba(7,10,18,.78);
+      backdrop-filter: blur(18px);
+      z-index: 20;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+      margin-top: 26px;
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--text-soft);
+      border-radius: 16px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 13px;
+      text-align: left;
+    }
+
+    .nav button:hover {
+      background: rgba(148,163,184,.07);
+      color: var(--text);
+    }
+
+    .nav button.active {
+      background: rgba(139,92,246,.12);
+      color: var(--text);
+      box-shadow: inset 2px 0 0 var(--purple);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      height: 76px;
+      z-index: 12;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7,10,18,.72);
+      backdrop-filter: blur(18px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 28px;
+    }
+
+    .mobile-menu {
+      display: none;
+    }
+
+    .page-title {
+      font-weight: 800;
+      letter-spacing: -.025em;
+    }
+
+    .account-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      background: rgba(17,24,39,.68);
+      border-radius: 999px;
+      padding: 6px 8px 6px 12px;
+      color: var(--text-soft);
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: var(--grad);
+      color: #EAF6FB;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+
+    .content {
+      width: min(1180px, calc(100% - 44px));
+      margin: 0 auto;
+      padding: 28px 0 52px;
+    }
+
+    .card {
+      background: var(--card-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 34px rgba(0,0,0,.24);
+      padding: 24px;
+      min-width: 0;
+      animation: rise .28s var(--ease);
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-card {
+      padding: clamp(26px, 4vw, 44px);
+      background:
+        radial-gradient(circle at 82% 18%, rgba(34,211,238,.09), transparent 20rem),
+        radial-gradient(circle at 12% 12%, rgba(139,92,246,.13), transparent 18rem),
+        rgba(17,24,39,.72);
+    }
+
+    .metric {
+      min-height: 132px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .metric-value {
+      font-size: 2.2rem;
+      font-weight: 850;
+      letter-spacing: -.05em;
+      font-variant-numeric: tabular-nums;
+      margin-top: 8px;
+    }
+
+    .empty {
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      background: rgba(7,10,18,.24);
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      background: rgba(7,10,18,.28);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .item-main {
+      min-width: 0;
+    }
+
+    .note-preview {
+      max-height: 6.2rem;
+      overflow: hidden;
+      color: var(--text-soft);
+      line-height: 1.55;
+      margin-top: 8px;
+      overflow-wrap: anywhere;
+    }
+
+    .note-body {
+      color: var(--text-soft);
+      line-height: 1.75;
+      background: rgba(7,10,18,.28);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      min-height: 280px;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .progress {
+      height: 10px;
+      background: rgba(148,163,184,.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: var(--w);
+      background: var(--grad);
+      border-radius: 999px;
+    }
+
+    .onboarding-shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+
+    .onboarding-card {
+      width: min(760px, 100%);
+    }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .subject-choice {
+      border: 1px solid var(--line);
+      background: rgba(7,10,18,.36);
+      color: var(--text-soft);
+      border-radius: 16px;
+      min-height: 52px;
+      padding: 0 14px;
+      text-align: left;
+    }
+
+    .subject-choice.selected {
+      border-color: rgba(139,92,246,.42);
+      background: rgba(139,92,246,.13);
+      color: var(--text);
+    }
+
+    .file-box {
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      padding: 24px;
+      background: rgba(7,10,18,.22);
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      top: 92px;
+      z-index: 100;
+      max-width: 360px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+      animation: rise .2s var(--ease);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(3,7,18,.76);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: min(800px, 100%);
+      max-height: calc(100vh - 44px);
+      overflow: auto;
+      background: var(--card);
+      border: 1px solid var(--line-strong);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .loading-line {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(139,92,246,.16), rgba(34,211,238,.22), rgba(139,92,246,.16));
+      background-size: 200% 100%;
+      animation: shimmer 1.1s linear infinite;
+    }
+
+    @keyframes shimmer {
+      to { background-position: -200% 0; }
+    }
+
+    @media (max-width: 900px) {
+      .auth-card {
+        grid-template-columns: 1fr;
+      }
+
+      .auth-intro {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 290px;
+        transform: translateX(-105%);
+        transition: transform .22s var(--ease);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .mobile-menu {
+        display: inline-flex;
+      }
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .content {
+        width: min(100% - 28px, 1180px);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .auth-shell,
+      .onboarding-shell {
+        padding: 14px;
+      }
+
+      .auth-intro,
+      .auth-form,
+      .card {
+        padding: 20px;
+      }
+
+      .topbar {
+        padding: 0 14px;
+      }
+
+      .account-pill span {
+        display: none;
+      }
+
+      .subject-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .item {
+        display: grid;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <div id="modalRoot" class="modal-backdrop"></div>
+
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+
+    const $ = (s, el = document) => el.querySelector(s);
+    const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+
+    const STORAGE_KEY = "learnlens-clean-app-v1";
+
+    const subjectOptions = [
+      "Mathematics",
+      "Science",
+      "English",
+      "Social Science",
+      "Computer Science",
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Economics",
+      "History"
+    ];
+
+    const gradeOptions = [
+      "Class 6",
+      "Class 7",
+      "Class 8",
+      "Class 9",
+      "Class 10",
+      "Class 11",
+      "Class 12",
+      "College",
+      "Other"
+    ];
+
+    const boardOptions = [
+      "CBSE",
+      "ICSE",
+      "IB",
+      "Cambridge",
+      "State Board",
+      "Other"
+    ];
+
+    const routes = [
+      { id: "dashboard", label: "Dashboard", icon: "⌂" },
+      { id: "generate", label: "Generate Notes", icon: "✦" },
+      { id: "notes", label: "My Notes", icon: "✎" },
+      { id: "planner", label: "Planner", icon: "◷" },
+      { id: "profile", label: "Profile", icon: "●" }
+    ];
+
+    let state = loadState();
+    let currentRoute = location.hash.replace("#/", "") || "dashboard";
+    let authMode = "signin";
+    let onboardingSelections = [];
+    let activeNoteId = null;
+
+    function initialState() {
+      return {
+        users: [],
+        sessionUserId: null
+      };
+    }
+
+    function createUserRecord({ name, email, password }) {
+      return {
+        id: crypto.randomUUID(),
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        createdAt: new Date().toISOString(),
+        onboardingDone: false,
+        profile: {
+          grade: "",
+          board: "",
+          subjects: [],
+          studyGoal: "",
+          examDate: "",
+          dailyMinutes: 30
+        },
+        notes: [],
+        tasks: []
+      };
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        const fresh = initialState();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+        return fresh;
+      }
+
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          users: Array.isArray(parsed.users) ? parsed.users : [],
+          sessionUserId: parsed.sessionUserId || null
+        };
+      } catch {
+        const fresh = initialState();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+        return fresh;
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function user() {
+      return state.users.find(u => u.id === state.sessionUserId) || null;
+    }
+
+    function setUser(next) {
+      const i = state.users.findIndex(u => u.id === next.id);
+      if (i >= 0) state.users[i] = next;
+      saveState();
+    }
+
+    function logo() {
+      return `
+        <svg class="logo" viewBox="0 0 64 64" aria-label="LearnLens AI">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop stop-color="#8B5CF6"></stop>
+              <stop offset=".58" stop-color="#3B82F6"></stop>
+              <stop offset="1" stop-color="#22D3EE"></stop>
+            </linearGradient>
+          </defs>
+          <path d="M7 32c8.2-13 16.4-19 25-19s16.8 6 25 19c-8.2 13-16.4 19-25 19S15.2 45 7 32Z"
+            fill="none" stroke="url(#logoGrad)" stroke-width="4.2" stroke-linecap="round"></path>
+          <path d="M19 24c4.8-5.4 9-8 13-8s8.2 2.6 13 8"
+            fill="none" stroke="rgba(230,237,243,.42)" stroke-width="2.1" stroke-linecap="round"></path>
+          <circle cx="32" cy="32" r="7.3" fill="url(#logoGrad)"></circle>
+          <circle cx="35" cy="29" r="1.8" fill="#D9F7FF" opacity=".82"></circle>
+        </svg>
+      `;
+    }
+
+    function render() {
+      const activeUser = user();
+
+      if (!activeUser) {
+        renderAuth();
+        return;
+      }
+
+      if (!activeUser.onboardingDone) {
+        renderOnboarding(activeUser);
+        return;
+      }
+
+      if (!routes.some(r => r.id === currentRoute)) currentRoute = "dashboard";
+
+      $("#root").innerHTML = `
+        <div class="app">
+          ${renderSidebar(activeUser)}
+          <main>
+            ${renderTopbar(activeUser)}
+            <section class="content" id="page"></section>
+          </main>
+        </div>
+      `;
+
+      renderPage();
+      bindShell();
+    }
+
+    function renderAuth() {
+      const isSignup = authMode === "signup";
+
+      $("#root").innerHTML = `
+        <section class="auth-shell">
+          <div class="auth-card">
+            <div class="auth-intro">
+              <div class="logo-row">
+                ${logo()}
+                <div>
+                  <div class="brand-name">LearnLens AI</div>
+                  <div class="tagline">Learn smarter. Understand deeper. Improve every day.</div>
+                </div>
+              </div>
+              <h1>Your quiet space for focused learning.</h1>
+              <p>Create an account, add your academic details, upload study material, and build useful notes without clutter.</p>
+              <div class="chip-row" style="margin-top:28px">
+                <span class="chip active">Private browser storage</span>
+                <span class="chip">PDF notes</span>
+                <span class="chip">Video note builder</span>
+                <span class="chip">Study planner</span>
+              </div>
+            </div>
+
+            <div class="auth-form">
+              <h2>${isSignup ? "Create account" : "Sign in"}</h2>
+              <p>${isSignup ? "Use your own details to start with a fresh profile." : "Access your saved LearnLens workspace."}</p>
+
+              <form id="authForm" class="grid" autocomplete="on">
+                ${isSignup ? `
+                  <div class="field">
+                    <label class="label" for="name">Full name</label>
+                    <input class="input" id="name" name="name" required autocomplete="name" />
+                  </div>
+                ` : ""}
+
+                <div class="field">
+                  <label class="label" for="email">Email</label>
+                  <input class="input" id="email" name="email" type="email" required autocomplete="email" />
+                </div>
+
+                <div class="field">
+                  <label class="label" for="password">Password</label>
+                  <input class="input" id="password" name="password" type="password" minlength="6" required autocomplete="${isSignup ? "new-password" : "current-password"}" />
+                </div>
+
+                <div id="authError" class="error"></div>
+
+                <button class="btn primary full" type="submit">${isSignup ? "Create account" : "Sign in"}</button>
+
+                <button class="link-btn" type="button" id="switchAuth">
+                  ${isSignup ? "I already have an account" : "Create a new account"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+      `;
+
+      $("#switchAuth").addEventListener("click", () => {
+        authMode = isSignup ? "signin" : "signup";
+        renderAuth();
+      });
+
+      $("#authForm").addEventListener("submit", handleAuthSubmit);
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+
+      const form = new FormData(e.currentTarget);
+      const email = String(form.get("email")).trim().toLowerCase();
+      const password = String(form.get("password"));
+      const err = $("#authError");
+
+      err.classList.remove("show");
+      err.textContent = "";
+
+      if (authMode === "signup") {
+        const name = String(form.get("name")).trim();
+
+        if (!name) return showInlineError(err, "Enter your name.");
+        if (password.length < 6) return showInlineError(err, "Password must contain at least 6 characters.");
+        if (state.users.some(u => u.email === email)) return showInlineError(err, "An account with this email already exists.");
+
+        const newUser = createUserRecord({ name, email, password });
+        state.users.push(newUser);
+        state.sessionUserId = newUser.id;
+        saveState();
+        showToast("Account created.");
+        render();
+        return;
+      }
+
+      const found = state.users.find(u => u.email === email && u.password === password);
+      if (!found) return showInlineError(err, "Email or password is incorrect.");
+
+      state.sessionUserId = found.id;
+      saveState();
+      showToast("Signed in.");
+      render();
+    }
+
+    function showInlineError(el, msg) {
+      el.textContent = msg;
+      el.classList.add("show");
+    }
+
+    function renderOnboarding(activeUser) {
+      onboardingSelections = [...activeUser.profile.subjects];
+
+      $("#root").innerHTML = `
+        <section class="onboarding-shell">
+          <div class="card onboarding-card">
+            <div class="logo-row" style="margin-bottom:24px">
+              ${logo()}
+              <div>
+                <div class="brand-name">Set up LearnLens</div>
+                <div class="tagline">Your details shape the workspace.</div>
+              </div>
+            </div>
+
+            <form id="onboardingForm" class="grid">
+              <div class="grid grid-2">
+                <div class="field">
+                  <label class="label" for="grade">Grade</label>
+                  <select class="select" id="grade" required>
+                    <option value="">Select grade</option>
+                    ${gradeOptions.map(g => `<option value="${escapeAttr(g)}">${escapeHtml(g)}</option>`).join("")}
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label class="label" for="board">Curriculum</label>
+                  <select class="select" id="board" required>
+                    <option value="">Select curriculum</option>
+                    ${boardOptions.map(b => `<option value="${escapeAttr(b)}">${escapeHtml(b)}</option>`).join("")}
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label">Subjects</label>
+                <div class="subject-grid" id="subjectGrid">
+                  ${subjectOptions.map(s => `
+                    <button type="button" class="subject-choice" data-subject="${escapeAttr(s)}">${escapeHtml(s)}</button>
+                  `).join("")}
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="goal">Study goal</label>
+                <textarea class="textarea" id="goal" required></textarea>
+              </div>
+
+              <div class="grid grid-2">
+                <div class="field">
+                  <label class="label" for="examDate">Exam date</label>
+                  <input class="input" id="examDate" type="date" />
+                </div>
+
+                <div class="field">
+                  <label class="label" for="dailyMinutes">Daily study minutes</label>
+                  <select class="select" id="dailyMinutes" required>
+                    <option value="15">15</option>
+                    <option value="30" selected>30</option>
+                    <option value="45">45</option>
+                    <option value="60">60</option>
+                    <option value="90">90</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="onboardingError" class="error"></div>
+
+              <button class="btn primary full" type="submit">Enter LearnLens</button>
+              <button class="link-btn" type="button" onclick="signOut()">Sign out</button>
+            </form>
+          </div>
+        </section>
+      `;
+
+      $$(".subject-choice").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const value = btn.dataset.subject;
+          if (onboardingSelections.includes(value)) {
+            onboardingSelections = onboardingSelections.filter(s => s !== value);
+            btn.classList.remove("selected");
+          } else {
+            onboardingSelections.push(value);
+            btn.classList.add("selected");
+          }
+        });
+      });
+
+      $("#onboardingForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const err = $("#onboardingError");
+        err.classList.remove("show");
+
+        if (!onboardingSelections.length) {
+          showInlineError(err, "Select at least one subject.");
+          return;
+        }
+
+        activeUser.profile = {
+          grade: $("#grade").value,
+          board: $("#board").value,
+          subjects: onboardingSelections,
+          studyGoal: $("#goal").value.trim(),
+          examDate: $("#examDate").value,
+          dailyMinutes: Number($("#dailyMinutes").value)
+        };
+
+        activeUser.onboardingDone = true;
+        setUser(activeUser);
+        showToast("Workspace ready.");
+        render();
+      });
+    }
+
+    function renderSidebar(activeUser) {
+      return `
+        <aside class="sidebar" id="sidebar">
+          <div class="logo-row" style="margin-bottom:10px">
+            ${logo()}
+            <div>
+              <div class="brand-name">LearnLens</div>
+              <div class="tagline">${escapeHtml(activeUser.profile.grade || "Student")}</div>
+            </div>
+          </div>
+
+          <nav class="nav">
+            ${routes.map(r => `
+              <button data-route="${r.id}" class="${currentRoute === r.id ? "active" : ""}">
+                <span>${r.icon}</span>
+                <span>${r.label}</span>
+              </button>
+            `).join("")}
+          </nav>
+        </aside>
+      `;
+    }
+
+    function renderTopbar(activeUser) {
+      const route = routes.find(r => r.id === currentRoute);
+
+      return `
+        <header class="topbar">
+          <div class="chip-row">
+            <button class="btn mobile-menu" id="menuBtn">☰</button>
+            <div class="page-title">${route ? route.label : "LearnLens"}</div>
+          </div>
+
+          <div class="chip-row">
+            <div class="account-pill">
+              <span>${escapeHtml(activeUser.name)}</span>
+              <div class="avatar">${escapeHtml(initials(activeUser.name))}</div>
+            </div>
+            <button class="btn danger" onclick="signOut()">Sign out</button>
+          </div>
+        </header>
+      `;
+    }
+
+    function bindShell() {
+      $$(".nav button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentRoute = btn.dataset.route;
+          location.hash = "/" + currentRoute;
+          $("#sidebar")?.classList.remove("open");
+          render();
+        });
+      });
+
+      $("#menuBtn")?.addEventListener("click", () => {
+        $("#sidebar").classList.toggle("open");
+      });
+    }
+
+    function renderPage() {
+      const page = $("#page");
+      const activeUser = user();
+
+      const pages = {
+        dashboard: dashboardPage,
+        generate: generatePage,
+        notes: notesPage,
+        planner: plannerPage,
+        profile: profilePage
+      };
+
+      page.innerHTML = pages[currentRoute](activeUser);
+      bindPage(currentRoute, activeUser);
+    }
+
+    function dashboardPage(activeUser) {
+      const noteCount = activeUser.notes.length;
+      const taskCount = activeUser.tasks.length;
+      const doneCount = activeUser.tasks.filter(t => t.done).length;
+      const todayTasks = activeUser.tasks.filter(t => t.date === today()).length;
+
+      return `
+        <section class="card hero-card">
+          <div class="grid grid-2" style="align-items:center">
+            <div>
+              <h1>Welcome, ${escapeHtml(firstName(activeUser.name))}.</h1>
+              <p>Your workspace is ready. Upload a PDF or video, generate notes, and organize your study tasks from one calm place.</p>
+              <div class="chip-row" style="margin-top:22px">
+                <button class="btn primary" onclick="navigateTo('generate')">Generate notes</button>
+                <button class="btn soft" onclick="navigateTo('planner')">Plan study</button>
+              </div>
+            </div>
+            <div class="card" style="box-shadow:none">
+              <h3>Academic profile</h3>
+              <div class="list">
+                <div class="chip-row"><span class="chip">Grade</span><strong>${escapeHtml(activeUser.profile.grade)}</strong></div>
+                <div class="chip-row"><span class="chip">Curriculum</span><strong>${escapeHtml(activeUser.profile.board)}</strong></div>
+                <div class="chip-row"><span class="chip">Subjects</span><strong>${escapeHtml(activeUser.profile.subjects.join(", "))}</strong></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid grid-3" style="margin-top:18px">
+          <div class="card metric">
+            <div class="muted">Saved notes</div>
+            <div class="metric-value">${noteCount}</div>
+            <button class="btn" onclick="navigateTo('notes')">Open notes</button>
+          </div>
+
+          <div class="card metric">
+            <div class="muted">Study tasks</div>
+            <div class="metric-value">${taskCount}</div>
+            <button class="btn" onclick="navigateTo('planner')">Manage tasks</button>
+          </div>
+
+          <div class="card metric">
+            <div class="muted">Completed tasks</div>
+            <div class="metric-value">${doneCount}</div>
+            <button class="btn" onclick="markAllTodayDone()">Complete today's tasks</button>
+          </div>
+        </section>
+
+        <section class="grid grid-2" style="margin-top:18px">
+          <div class="card">
+            <h2>Recent notes</h2>
+            ${activeUser.notes.length ? `
+              <div class="list">
+                ${activeUser.notes.slice(0, 3).map(n => noteListItem(n, false)).join("")}
+              </div>
+            ` : emptyState("No notes yet.", "Upload study material to create your first note.", "Generate notes", "generate")}
+          </div>
+
+          <div class="card">
+            <h2>Today</h2>
+            ${todayTasks ? `
+              <div class="list">
+                ${activeUser.tasks.filter(t => t.date === today()).map(taskItem).join("")}
+              </div>
+            ` : emptyState("No tasks scheduled today.", "Add a task for your next study session.", "Open planner", "planner")}
+          </div>
+        </section>
+      `;
+    }
+
+    function generatePage(activeUser) {
+      return `
+        <section class="grid grid-2">
+          <div class="card">
+            <h2>Generate Notes</h2>
+            <p>Upload a PDF or video file. PDF text is extracted in the browser. Video notes are created from available captions or transcript text when provided.</p>
+
+            <form id="generateForm" class="grid">
+              <div class="field">
+                <label class="label" for="noteSubject">Subject</label>
+                <select class="select" id="noteSubject" required>
+                  ${activeUser.profile.subjects.map(s => `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`).join("")}
+                </select>
+              </div>
+
+              <div class="field">
+                <label class="label" for="noteTitle">Note title</label>
+                <input class="input" id="noteTitle" required />
+              </div>
+
+              <div class="file-box">
+                <div class="field">
+                  <label class="label" for="sourceFile">PDF or video file</label>
+                  <input class="input" id="sourceFile" type="file" accept="application/pdf,video/*" required />
+                </div>
+              </div>
+
+              <div id="videoAssist" class="field hidden">
+                <label class="label" for="videoTranscript">Video captions or transcript text</label>
+                <textarea class="textarea" id="videoTranscript"></textarea>
+              </div>
+
+              <button class="btn primary full" id="generateBtn" type="submit">Generate note</button>
+            </form>
+
+            <div id="generateStatus" style="margin-top:18px"></div>
+          </div>
+
+          <div class="card">
+            <h2>Generated note</h2>
+            <div id="generatedPreview" class="empty">
+              <p class="muted">Generated notes will appear here before saving.</p>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function bindPage(route, activeUser) {
+      if (route === "generate") bindGenerate(activeUser);
+      if (route === "notes") bindNotes(activeUser);
+      if (route === "planner") bindPlanner(activeUser);
+      if (route === "profile") bindProfile(activeUser);
+    }
+
+    function bindGenerate(activeUser) {
+      const fileInput = $("#sourceFile");
+      const assist = $("#videoAssist");
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        assist.classList.toggle("hidden", !(file && file.type.startsWith("video/")));
+      });
+
+      $("#generateForm").addEventListener("submit", async e => {
+        e.preventDefault();
+
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const title = $("#noteTitle").value.trim();
+        const subject = $("#noteSubject").value;
+        const status = $("#generateStatus");
+        const preview = $("#generatedPreview");
+        const btn = $("#generateBtn");
+
+        btn.disabled = true;
+        status.innerHTML = `
+          <div class="card" style="box-shadow:none;padding:16px">
+            <p>Processing file...</p>
+            <div class="loading-line"></div>
+          </div>
+        `;
+        preview.innerHTML = `<div class="loading-line"></div>`;
+
+        try {
+          let extractedText = "";
+          let sourceType = "file";
+          let metadata = {};
+
+          if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+            sourceType = "PDF";
+            extractedText = await extractPdfText(file);
+            metadata.pages = extractedText ? undefined : "Text extraction returned limited content";
+          } else if (file.type.startsWith("video/")) {
+            sourceType = "Video";
+            metadata.duration = await getVideoDuration(file);
+            extractedText = $("#videoTranscript").value.trim();
+          } else {
+            throw new Error("Unsupported file type.");
+          }
+
+          const noteText = buildNotes({
+            title,
+            subject,
+            sourceName: file.name,
+            sourceType,
+            text: extractedText,
+            metadata,
+            profile: activeUser.profile
+          });
+
+          const draft = {
+            id: crypto.randomUUID(),
+            title,
+            subject,
+            sourceName: file.name,
+            sourceType,
+            text: noteText,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+
+          preview.innerHTML = `
+            <div class="note-body">${escapeHtml(noteText)}</div>
+            <div class="chip-row" style="margin-top:16px">
+              <button class="btn primary" id="saveGenerated">Save note</button>
+              <button class="btn" id="downloadGenerated">Download text</button>
+            </div>
+          `;
+
+          $("#saveGenerated").addEventListener("click", () => {
+            activeUser.notes.unshift(draft);
+            setUser(activeUser);
+            showToast("Note saved.");
+            activeNoteId = draft.id;
+            navigateTo("notes");
+          });
+
+          $("#downloadGenerated").addEventListener("click", () => {
+            downloadText(`${safeFileName(title)}.txt`, noteText);
+          });
+
+          status.innerHTML = `<div class="success">Note generated. Review it before saving.</div>`;
+        } catch (err) {
+          status.innerHTML = `<div class="error show">${escapeHtml(err.message || "Could not generate note.")}</div>`;
+          preview.innerHTML = `<div class="empty"><p class="muted">Generation stopped.</p></div>`;
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    }
+
+    async function extractPdfText(file) {
+      const buffer = await file.arrayBuffer();
+
+      if (window.pdfjsLib) {
+        try {
+          const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+          const pages = [];
+
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const text = content.items.map(item => item.str).join(" ");
+            if (text.trim()) pages.push(text.trim());
+          }
+
+          const joined = pages.join("\n\n");
+          if (joined.trim().length > 20) return normalizeText(joined);
+        } catch {}
+      }
+
+      const raw = new TextDecoder("latin1").decode(buffer);
+      const chunks = raw.match(/[A-Za-z0-9,.;:'"()\-+/% ]{12,}/g) || [];
+      const cleaned = chunks
+        .map(s => s.replace(/\s+/g, " ").trim())
+        .filter(s => {
+          const lower = s.toLowerCase();
+          return s.length > 16 &&
+            !lower.includes("obj") &&
+            !lower.includes("endobj") &&
+            !lower.includes("stream") &&
+            !lower.includes("xref") &&
+            !lower.includes("font") &&
+            !lower.includes("metadata");
+        })
+        .slice(0, 220)
+        .join(" ");
+
+      return normalizeText(cleaned);
+    }
+
+    function getVideoDuration(file) {
+      return new Promise(resolve => {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.src = URL.createObjectURL(file);
+        video.onloadedmetadata = () => {
+          const duration = Number.isFinite(video.duration) ? Math.round(video.duration) : 0;
+          URL.revokeObjectURL(video.src);
+          resolve(duration);
+        };
+        video.onerror = () => resolve(0);
+      });
+    }
+
+    function buildNotes({ title, subject, sourceName, sourceType, text, metadata, profile }) {
+      const cleaned = normalizeText(text || "");
+      const sentences = cleaned
+        .split(/(?<=[.!?])\s+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 32);
+
+      const keywords = extractKeywords(cleaned).slice(0, 12);
+      const summary = summarizeSentences(sentences, keywords, 7);
+      const sections = [];
+
+      sections.push(`Title: ${title}`);
+      sections.push(`Subject: ${subject}`);
+      sections.push(`Source type: ${sourceType}`);
+      sections.push(`Source file: ${sourceName}`);
+      sections.push(`Academic level: ${profile.grade} · ${profile.board}`);
+
+      if (sourceType === "Video" && metadata.duration) {
+        sections.push(`Video duration: ${formatDuration(metadata.duration)}`);
+      }
+
+      sections.push("");
+
+      if (!cleaned || cleaned.length < 80) {
+        sections.push("Content note:");
+        sections.push("The uploaded file was imported, but there was not enough readable text available in the browser to create detailed content notes.");
+        sections.push("");
+        sections.push("Study structure:");
+        sections.push("- Watch or review the source once without pausing.");
+        sections.push("- Revisit important sections and add timestamps or captions.");
+        sections.push("- Convert each important idea into one short question.");
+        sections.push("- Save unclear parts as doubts for later revision.");
+        sections.push("");
+        sections.push("Revision checklist:");
+        sections.push("- Main idea identified");
+        sections.push("- Key terms collected");
+        sections.push("- Difficult parts marked");
+        sections.push("- Short recap written after review");
+        return sections.join("\n");
+      }
+
+      sections.push("Overview:");
+      sections.push(summary.length ? summary.join("\n") : cleaned.slice(0, 900));
+      sections.push("");
+
+      sections.push("Key terms:");
+      if (keywords.length) {
+        keywords.forEach(k => sections.push(`- ${k}`));
+      } else {
+        sections.push("- No strong repeated terms were detected.");
+      }
+      sections.push("");
+
+      sections.push("Important points:");
+      const important = summary.length ? summary.slice(0, 6) : sentences.slice(0, 6);
+      important.forEach(s => sections.push(`- ${s}`));
+      sections.push("");
+
+      sections.push("Short revision questions:");
+      keywords.slice(0, 5).forEach(k => sections.push(`- What should you remember about ${k}?`));
+      if (!keywords.length) sections.push("- What is the central idea of this material?");
+      sections.push("");
+
+      sections.push("Final recap:");
+      sections.push(makeRecap(summary, cleaned));
+
+      return sections.join("\n");
+    }
+
+    function normalizeText(text) {
+      return String(text || "")
+        .replace(/\u0000/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/([.!?])\s+/g, "$1 ")
+        .trim();
+    }
+
+    function extractKeywords(text) {
+      const stop = new Set([
+        "the","and","for","that","this","with","from","are","was","were","you","your","have","has","had",
+        "not","but","can","will","all","any","into","than","then","their","there","when","what","which",
+        "also","more","about","each","between","been","being","they","them","these","those","may","use",
+        "used","using","such","through","after","before","because","where","while","over","under"
+      ]);
+
+      const counts = {};
+      String(text || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, " ")
+        .split(/\s+/)
+        .filter(w => w.length > 3 && !stop.has(w))
+        .forEach(w => counts[w] = (counts[w] || 0) + 1);
+
+      return Object.entries(counts)
+        .sort((a,b) => b[1] - a[1])
+        .map(([word]) => titleCase(word));
+    }
+
+    function summarizeSentences(sentences, keywords, limit) {
+      if (!sentences.length) return [];
+      const keySet = new Set(keywords.map(k => k.toLowerCase()));
+
+      return sentences
+        .map((s, i) => {
+          const words = s.toLowerCase().replace(/[^a-z0-9\s-]/g, " ").split(/\s+/);
+          const score = words.reduce((n, w) => n + (keySet.has(w) ? 2 : 0), 0) + Math.max(0, 5 - i * .2);
+          return { s, score, i };
+        })
+        .sort((a,b) => b.score - a.score)
+        .slice(0, limit)
+        .sort((a,b) => a.i - b.i)
+        .map(x => x.s);
+    }
+
+    function makeRecap(summary, cleaned) {
+      const base = summary.length ? summary.slice(0, 3).join(" ") : cleaned.slice(0, 420);
+      return base.length > 520 ? base.slice(0, 520).trim() + "..." : base;
+    }
+
+    function notesPage(activeUser) {
+      const selected = activeUser.notes.find(n => n.id === activeNoteId) || activeUser.notes[0];
+
+      return `
+        <section class="grid grid-2">
+          <div class="card">
+            <div class="chip-row" style="justify-content:space-between;margin-bottom:16px">
+              <h2>My Notes</h2>
+              <button class="btn primary" onclick="navigateTo('generate')">New note</button>
+            </div>
+
+            <div class="field" style="margin-bottom:16px">
+              <label class="label" for="noteSearch">Search</label>
+              <input class="input" id="noteSearch" />
+            </div>
+
+            <div id="noteList">
+              ${activeUser.notes.length ? `
+                <div class="list">
+                  ${activeUser.notes.map(n => noteListItem(n, true)).join("")}
+                </div>
+              ` : emptyState("No notes saved.", "Generate and save notes from uploaded material.", "Generate notes", "generate")}
+            </div>
+          </div>
+
+          <div class="card" id="noteDetail">
+            ${selected ? noteDetail(selected) : `
+              <h2>Note viewer</h2>
+              <div class="empty"><p class="muted">Select a note after saving one.</p></div>
+            `}
+          </div>
+        </section>
+      `;
+    }
+
+    function noteListItem(note, selectable) {
+      return `
+        <article class="item">
+          <div class="item-main">
+            <h3>${escapeHtml(note.title)}</h3>
+            <div class="chip-row">
+              <span class="chip">${escapeHtml(note.subject)}</span>
+              <span class="chip">${escapeHtml(note.sourceType)}</span>
+            </div>
+            <div class="note-preview">${escapeHtml(note.text.slice(0, 220))}</div>
+          </div>
+          ${selectable ? `<button class="btn" onclick="openNote('${note.id}')">Open</button>` : ""}
+        </article>
+      `;
+    }
+
+    function noteDetail(note) {
+      return `
+        <div class="chip-row" style="justify-content:space-between;margin-bottom:16px">
+          <div>
+            <h2>${escapeHtml(note.title)}</h2>
+            <p class="micro muted">${escapeHtml(note.subject)} · ${escapeHtml(note.sourceType)} · ${formatDate(note.createdAt)}</p>
+          </div>
+          <div class="chip-row">
+            <button class="btn" onclick="editNote('${note.id}')">Edit</button>
+            <button class="btn" onclick="downloadNote('${note.id}')">Download</button>
+            <button class="btn danger" onclick="deleteNote('${note.id}')">Delete</button>
+          </div>
+        </div>
+        <div class="note-body">${escapeHtml(note.text)}</div>
+      `;
+    }
+
+    function bindNotes(activeUser) {
+      $("#noteSearch")?.addEventListener("input", e => {
+        const q = e.target.value.toLowerCase().trim();
+        const notes = activeUser.notes.filter(n =>
+          n.title.toLowerCase().includes(q) ||
+          n.subject.toLowerCase().includes(q) ||
+          n.text.toLowerCase().includes(q)
+        );
+
+        $("#noteList").innerHTML = notes.length ? `
+          <div class="list">${notes.map(n => noteListItem(n, true)).join("")}</div>
+        ` : `<div class="empty"><p class="muted">No matching notes.</p></div>`;
+      });
+    }
+
+    function plannerPage(activeUser) {
+      return `
+        <section class="grid grid-2">
+          <div class="card">
+            <h2>Add study task</h2>
+            <form id="taskForm" class="grid">
+              <div class="field">
+                <label class="label" for="taskTitle">Task</label>
+                <input class="input" id="taskTitle" required />
+              </div>
+
+              <div class="grid grid-2">
+                <div class="field">
+                  <label class="label" for="taskSubject">Subject</label>
+                  <select class="select" id="taskSubject" required>
+                    ${activeUser.profile.subjects.map(s => `<option>${escapeHtml(s)}</option>`).join("")}
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label class="label" for="taskDate">Date</label>
+                  <input class="input" id="taskDate" type="date" value="${today()}" required />
+                </div>
+              </div>
+
+              <div class="grid grid-2">
+                <div class="field">
+                  <label class="label" for="taskMinutes">Minutes</label>
+                  <input class="input" id="taskMinutes" type="number" min="5" max="240" value="${activeUser.profile.dailyMinutes}" required />
+                </div>
+
+                <div class="field">
+                  <label class="label" for="taskPriority">Priority</label>
+                  <select class="select" id="taskPriority">
+                    <option>Low</option>
+                    <option selected>Medium</option>
+                    <option>High</option>
+                  </select>
+                </div>
+              </div>
+
+              <button class="btn primary full" type="submit">Save task</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h2>Study tasks</h2>
+            <div id="taskList">
+              ${activeUser.tasks.length ? `
+                <div class="list">${activeUser.tasks.map(taskItem).join("")}</div>
+              ` : emptyState("No tasks yet.", "Create a study task to organize your time.", null, null)}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function taskItem(t) {
+      return `
+        <article class="item">
+          <div class="item-main">
+            <h3 style="${t.done ? "text-decoration:line-through;color:var(--text-muted)" : ""}">${escapeHtml(t.title)}</h3>
+            <div class="chip-row">
+              <span class="chip">${escapeHtml(t.subject)}</span>
+              <span class="chip">${escapeHtml(t.date)}</span>
+              <span class="chip">${Number(t.minutes)} min</span>
+              <span class="chip">${escapeHtml(t.priority)}</span>
+            </div>
+          </div>
+          <div class="chip-row">
+            <button class="btn" onclick="toggleTask('${t.id}')">${t.done ? "Undo" : "Done"}</button>
+            <button class="btn danger" onclick="deleteTask('${t.id}')">Delete</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function bindPlanner(activeUser) {
+      $("#taskForm")?.addEventListener("submit", e => {
+        e.preventDefault();
+
+        activeUser.tasks.unshift({
+          id: crypto.randomUUID(),
+          title: $("#taskTitle").value.trim(),
+          subject: $("#taskSubject").value,
+          date: $("#taskDate").value,
+          minutes: Number($("#taskMinutes").value),
+          priority: $("#taskPriority").value,
+          done: false,
+          createdAt: new Date().toISOString()
+        });
+
+        setUser(activeUser);
+        showToast("Task saved.");
+        renderPage();
+      });
+    }
+
+    function profilePage(activeUser) {
+      return `
+        <section class="grid grid-2">
+          <div class="card">
+            <h2>Account</h2>
+            <form id="profileForm" class="grid">
+              <div class="field">
+                <label class="label" for="profileName">Name</label>
+                <input class="input" id="profileName" value="${escapeAttr(activeUser.name)}" required />
+              </div>
+
+              <div class="field">
+                <label class="label" for="profileEmail">Email</label>
+                <input class="input" id="profileEmail" type="email" value="${escapeAttr(activeUser.email)}" required />
+              </div>
+
+              <button class="btn primary full" type="submit">Save account</button>
+            </form>
+
+            <div style="margin-top:18px" class="chip-row">
+              <button class="btn danger" onclick="signOut()">Sign out</button>
+              <button class="btn danger" onclick="deleteAccount()">Delete account</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Academic details</h2>
+            <form id="academicForm" class="grid">
+              <div class="grid grid-2">
+                <div class="field">
+                  <label class="label" for="profileGrade">Grade</label>
+                  <select class="select" id="profileGrade">
+                    ${gradeOptions.map(g => `<option ${activeUser.profile.grade === g ? "selected" : ""}>${escapeHtml(g)}</option>`).join("")}
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label class="label" for="profileBoard">Curriculum</label>
+                  <select class="select" id="profileBoard">
+                    ${boardOptions.map(b => `<option ${activeUser.profile.board === b ? "selected" : ""}>${escapeHtml(b)}</option>`).join("")}
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="profileGoal">Study goal</label>
+                <textarea class="textarea" id="profileGoal">${escapeHtml(activeUser.profile.studyGoal)}</textarea>
+              </div>
+
+              <div class="grid grid-2">
+                <div class="field">
+                  <label class="label" for="profileExamDate">Exam date</label>
+                  <input class="input" id="profileExamDate" type="date" value="${escapeAttr(activeUser.profile.examDate || "")}" />
+                </div>
+
+                <div class="field">
+                  <label class="label" for="profileDaily">Daily study minutes</label>
+                  <input class="input" id="profileDaily" type="number" min="5" max="240" value="${Number(activeUser.profile.dailyMinutes)}" />
+                </div>
+              </div>
+
+              <button class="btn primary full" type="submit">Save academic details</button>
+            </form>
+          </div>
+        </section>
+      `;
+    }
+
+    function bindProfile(activeUser) {
+      $("#profileForm")?.addEventListener("submit", e => {
+        e.preventDefault();
+
+        const email = $("#profileEmail").value.trim().toLowerCase();
+        if (state.users.some(u => u.email === email && u.id !== activeUser.id)) {
+          showToast("Email is already used by another account.");
+          return;
+        }
+
+        activeUser.name = $("#profileName").value.trim();
+        activeUser.email = email;
+        setUser(activeUser);
+        showToast("Account saved.");
+        render();
+      });
+
+      $("#academicForm")?.addEventListener("submit", e => {
+        e.preventDefault();
+
+        activeUser.profile.grade = $("#profileGrade").value;
+        activeUser.profile.board = $("#profileBoard").value;
+        activeUser.profile.studyGoal = $("#profileGoal").value.trim();
+        activeUser.profile.examDate = $("#profileExamDate").value;
+        activeUser.profile.dailyMinutes = Number($("#profileDaily").value);
+
+        setUser(activeUser);
+        showToast("Academic details saved.");
+        render();
+      });
+    }
+
+    function emptyState(title, body, actionLabel, route) {
+      return `
+        <div class="empty">
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(body)}</p>
+          ${actionLabel ? `<button class="btn primary" onclick="navigateTo('${route}')">${escapeHtml(actionLabel)}</button>` : ""}
+        </div>
+      `;
+    }
+
+    function openNote(id) {
+      activeNoteId = id;
+      renderPage();
+    }
+
+    function editNote(id) {
+      const activeUser = user();
+      const note = activeUser.notes.find(n => n.id === id);
+      if (!note) return;
+
+      openModal(`
+        <h2>Edit note</h2>
+        <div class="grid">
+          <div class="field">
+            <label class="label" for="editTitle">Title</label>
+            <input class="input" id="editTitle" value="${escapeAttr(note.title)}" />
+          </div>
+          <div class="field">
+            <label class="label" for="editText">Content</label>
+            <textarea class="textarea" id="editText" style="min-height:340px">${escapeHtml(note.text)}</textarea>
+          </div>
+          <button class="btn primary" id="saveEdit">Save changes</button>
+        </div>
+      `);
+
+      $("#saveEdit").addEventListener("click", () => {
+        note.title = $("#editTitle").value.trim() || note.title;
+        note.text = $("#editText").value;
+        note.updatedAt = new Date().toISOString();
+        setUser(activeUser);
+        closeModal();
+        showToast("Note updated.");
+        renderPage();
+      });
+    }
+
+    function deleteNote(id) {
+      const activeUser = user();
+      const note = activeUser.notes.find(n => n.id === id);
+      if (!note) return;
+
+      openModal(`
+        <h2>Delete note</h2>
+        <p>This will remove the note from this browser.</p>
+        <div class="chip-row">
+          <button class="btn danger" id="confirmDeleteNote">Delete</button>
+          <button class="btn" onclick="closeModal()">Cancel</button>
+        </div>
+      `);
+
+      $("#confirmDeleteNote").addEventListener("click", () => {
+        activeUser.notes = activeUser.notes.filter(n => n.id !== id);
+        if (activeNoteId === id) activeNoteId = null;
+        setUser(activeUser);
+        closeModal();
+        showToast("Note deleted.");
+        renderPage();
+      });
+    }
+
+    function downloadNote(id) {
+      const activeUser = user();
+      const note = activeUser.notes.find(n => n.id === id);
+      if (!note) return;
+      downloadText(`${safeFileName(note.title)}.txt`, note.text);
+    }
+
+    function toggleTask(id) {
+      const activeUser = user();
+      const task = activeUser.tasks.find(t => t.id === id);
+      if (!task) return;
+      task.done = !task.done;
+      setUser(activeUser);
+      renderPage();
+    }
+
+    function deleteTask(id) {
+      const activeUser = user();
+      activeUser.tasks = activeUser.tasks.filter(t => t.id !== id);
+      setUser(activeUser);
+      showToast("Task deleted.");
+      renderPage();
+    }
+
+    function markAllTodayDone() {
+      const activeUser = user();
+      let changed = false;
+
+      activeUser.tasks.forEach(t => {
+        if (t.date === today() && !t.done) {
+          t.done = true;
+          changed = true;
+        }
+      });
+
+      if (!changed) {
+        showToast("No unfinished tasks for today.");
+      } else {
+        setUser(activeUser);
+        showToast("Today's tasks completed.");
+        renderPage();
+      }
+    }
+
+    function signOut() {
+      state.sessionUserId = null;
+      saveState();
+      currentRoute = "dashboard";
+      location.hash = "";
+      showToast("Signed out.");
+      render();
+    }
+
+    function deleteAccount() {
+      const activeUser = user();
+      if (!activeUser) return;
+
+      openModal(`
+        <h2>Delete account</h2>
+        <p>This removes the current account, notes, tasks, and academic details from this browser.</p>
+        <div class="chip-row">
+          <button class="btn danger" id="confirmDeleteAccount">Delete account</button>
+          <button class="btn" onclick="closeModal()">Cancel</button>
+        </div>
+      `);
+
+      $("#confirmDeleteAccount").addEventListener("click", () => {
+        state.users = state.users.filter(u => u.id !== activeUser.id);
+        state.sessionUserId = null;
+        saveState();
+        closeModal();
+        showToast("Account deleted.");
+        render();
+      });
+    }
+
+    function navigateTo(route) {
+      currentRoute = route;
+      location.hash = "/" + route;
+      render();
+    }
+
+    function openModal(html) {
+      $("#modalRoot").innerHTML = `<div class="modal">${html}</div>`;
+      $("#modalRoot").classList.add("show");
+    }
+
+    function closeModal() {
+      $("#modalRoot").classList.remove("show");
+      $("#modalRoot").innerHTML = "";
+    }
+
+    $("#modalRoot").addEventListener("click", e => {
+      if (e.target.id === "modalRoot") closeModal();
+    });
+
+    window.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    window.addEventListener("hashchange", () => {
+      currentRoute = location.hash.replace("#/", "") || "dashboard";
+      render();
+    });
+
+    function showToast(message) {
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = message;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2400);
+    }
+
+    function downloadText(filename, text) {
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function safeFileName(name) {
+      return String(name || "note").replace(/[^\w\-]+/g, "_").replace(/_+/g, "_").slice(0, 80);
+    }
+
+    function today() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function formatDate(iso) {
+      try {
+        return new Intl.DateTimeFormat(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        }).format(new Date(iso));
+      } catch {
+        return "";
+      }
+    }
+
+    function formatDuration(seconds) {
+      const s = Number(seconds) || 0;
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      if (h) return `${h}h ${m}m ${sec}s`;
+      if (m) return `${m}m ${sec}s`;
+      return `${sec}s`;
+    }
+
+    function firstName(name) {
+      return String(name || "Student").trim().split(/\s+/)[0] || "Student";
+    }
+
+    function initials(name) {
+      const parts = String(name || "S").trim().split(/\s+/).filter(Boolean);
+      return ((parts[0]?.[0] || "S") + (parts[1]?.[0] || "")).toUpperCase();
+    }
+
+    function titleCase(s) {
+      return String(s || "").replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function escapeHtml(str = "") {
+      return String(str).replace(/[&<>"']/g, ch => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[ch]);
+    }
+
+    function escapeAttr(str = "") {
+      return escapeHtml(str).replace(/"/g, "&quot;");
+    }
+
+    render();
+  </script>
+</body>
+</html>
